@@ -114,11 +114,17 @@ class Transcriber:
         if self._model is None:
             from faster_whisper import WhisperModel, download_model
 
-            weights = MODEL_FOLDER / "model.bin"
-            if not weights.exists() or weights.stat().st_size < 1_000_000:  # e.g. cloned without Git LFS
+            if not _model_present():
                 progress("Downloading speech model (1.6 GB, once)…", None)
                 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
-                download_model(MODEL, output_dir=str(MODEL_FOLDER))
+                try:
+                    download_model(MODEL, output_dir=str(MODEL_FOLDER))
+                except Exception:
+                    pass  # reported just below
+                # When Hugging Face can't be reached, the download quietly leaves the folder as it was.
+                if not _model_present():
+                    raise RuntimeError('speech model missing. In the app folder, run "git lfs pull" '
+                                       "(or connect to the internet so it can be downloaded).")
             progress("Loading speech model…", None)
             self._model = WhisperModel(str(MODEL_FOLDER), device="cpu", compute_type="int8",
                                        cpu_threads=max(1, (os.cpu_count() or 2) // 2))
@@ -254,10 +260,17 @@ class Processor:
             elif kind == "done:":
                 summary = text
             elif line.strip():
-                last_output = line.strip()  # e.g. the last line of a Python error
+                # e.g. the last line of a Python error, without its "RuntimeError: " prefix
+                last_output = re.sub(r"^\w+(Error|Exception): ", "", line.strip())
         if self._child.wait() != 0 or summary is None:
             raise RuntimeError(last_output)
         return summary
+
+
+def _model_present() -> bool:
+    # A clone made without Git LFS holds a ~130-byte placeholder instead of the 1.6 GB model.
+    weights = MODEL_FOLDER / "model.bin"
+    return weights.is_file() and weights.stat().st_size > 1_000_000
 
 
 def _time_left(started: float, fraction: float) -> str:

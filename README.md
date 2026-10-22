@@ -6,12 +6,17 @@ Written in Python. Recording uses only the standard library (`tkinter` for the w
 
 ## Set up
 
-Needs Windows 10 or 11 and Python 3.12 or newer from python.org.
+Needs Windows 10 or 11, Python 3.12 or newer from python.org, and Git for Windows (it includes Git LFS, which brings the 1.6 GB speech model).
 
 ```
+git lfs install
+git clone https://github.com/YoanLeblanc/audio-recorder.git
+cd audio-recorder
 py -m venv .venv
 .venv\Scripts\pip install -r requirements.txt
 ```
+
+Already cloned without Git LFS? The transcript then fails with "speech model missing". Fix it in the app folder with `git lfs install` then `git lfs pull`.
 
 ## Run
 

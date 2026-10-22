@@ -134,9 +134,10 @@ class App:
         self.status_label = tk.Label(status_row, font=self.body_font, fg=MUTED, bg=WHITE, bd=0, padx=0, pady=0)
         self.status_label.pack(side="left")
         self.open_link = self._link(status_row, "Open folder", lambda: _open_folder(self.saved_folder))
+        self.info_width = self.content_width - self.record_button.winfo_reqwidth() - self.px(20)
+        self.status_label.configure(justify="left")
         # Shows how far the MP3 and transcript are. Its space is always reserved so the window never jumps.
-        self.progress_bar = ProgressBar(info, self.content_width - self.record_button.winfo_reqwidth() - self.px(20),
-                                        self.px(6))
+        self.progress_bar = ProgressBar(info, self.info_width, self.px(6))
         self.progress_bar.pack(anchor="w", pady=(self.px(7), 0))
 
         self._divider(outer, top=self.px(20), bottom=self.px(12))
@@ -316,7 +317,9 @@ class App:
     def _set_status(self, text: str, show_open_link: bool = False) -> None:
         if self.status_label.cget("text") == text and bool(self.open_link.winfo_manager()) == show_open_link:
             return
-        self.status_label.configure(text=text)
+        # Long messages (errors) wrap beside the link instead of widening the window.
+        link_space = self.open_link.winfo_reqwidth() + self.px(10) if show_open_link else 0
+        self.status_label.configure(text=text, wraplength=self.info_width - link_space)
         if show_open_link:
             self.open_link.pack(side="left", padx=(self.px(10), 0))
         else:
