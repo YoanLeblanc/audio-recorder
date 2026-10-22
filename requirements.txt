@@ -1,0 +1,2 @@
+# Optional: MP3 + speech-to-text after each recording (recording itself needs only the standard library).
+faster-whisper>=1.2

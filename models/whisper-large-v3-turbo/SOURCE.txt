@@ -1,0 +1,2 @@
+﻿OpenAI Whisper large-v3-turbo (MIT license), converted for faster-whisper / CTranslate2.
+Downloaded from https://huggingface.co/mobiuslabsgmbh/faster-whisper-large-v3-turbo at revision 0a363e9161cbc7ed1431c9597a8ceaf0c4f78fcf.
